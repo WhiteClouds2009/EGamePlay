@@ -8,7 +8,7 @@ namespace EGamePlay.Combat.Status
         //投放者、施术者
         public CombatEntity Caster { get; set; }
         public StatusConfigObject StatusConfigObject { get; set; }
-        public FloatModifier NumericModifier { get; set; }
+        public Dictionary<AttributeType, FloatModifier> AttributeTypeModifiers { get; set; }
         private List<StatusAbility> ChildrenStatuses { get; set; } = new List<StatusAbility>();
 
 
@@ -26,29 +26,23 @@ namespace EGamePlay.Combat.Status
             {
 
             }
+
+            // 如果开启了属性修改
             if (StatusConfigObject.EnabledAttributeModify)
             {
-                switch (StatusConfigObject.AttributeType)
+                AttributeTypeModifiers = new Dictionary<AttributeType, FloatModifier>();
+                var attributeComponent = GetParent<CombatEntity>().AttributeComponent;
+                foreach (var item in StatusConfigObject.AttributeTypeDatas)
                 {
-                    case AttributeType.None:
-                        break;
-                    case AttributeType.AttackPower:
-                        var value = int.Parse(StatusConfigObject.NumericValue);
-                        NumericModifier = new FloatModifier() { Value = value };
-                        GetParent<CombatEntity>().AttributeComponent.AttackPower.AddAddModifier(NumericModifier);
-                        break;
-                    case AttributeType.AttackDefense:
-                        break;
-                    case AttributeType.SpellPower:
-                        break;
-                    case AttributeType.MagicDefense:
-                        break;
-                    case AttributeType.CriticalProbability:
-                        break;
-                    default:
-                        break;
+                    var value = int.Parse(item.Value);
+                    var numericModifier = new FloatModifier() { Value = value };
+                    var attribute = attributeComponent.attributeNumerics[nameof(item.Value)];
+                    attribute.AddAddModifier(numericModifier);
+                    AttributeTypeModifiers.Add(item.Key, numericModifier);
                 }
             }
+
+
             if (StatusConfigObject.EnabledLogicTrigger)
             {
                 foreach (var item in StatusConfigObject.Effects)
@@ -85,23 +79,12 @@ namespace EGamePlay.Combat.Status
             }
             if (StatusConfigObject.EnabledAttributeModify)
             {
-                switch (StatusConfigObject.AttributeType)
+                var attributeComponent = GetParent<CombatEntity>().AttributeComponent;
+                foreach (var item in StatusConfigObject.AttributeTypeDatas)
                 {
-                    case AttributeType.None:
-                        break;
-                    case AttributeType.AttackPower:
-                        GetParent<CombatEntity>().AttributeComponent.AttackPower.RemoveAddModifier(NumericModifier);
-                        break;
-                    case AttributeType.AttackDefense:
-                        break;
-                    case AttributeType.SpellPower:
-                        break;
-                    case AttributeType.MagicDefense:
-                        break;
-                    case AttributeType.CriticalProbability:
-                        break;
-                    default:
-                        break;
+                    var numericModifier = AttributeTypeModifiers[item.Key];
+                    var attribute = attributeComponent.attributeNumerics[nameof(item.Value)];
+                    attribute.RemoveAddModifier(numericModifier);
                 }
             }
             if (StatusConfigObject.EnabledLogicTrigger)
@@ -113,7 +96,7 @@ namespace EGamePlay.Combat.Status
                 item.EndAbility();
             }
             ChildrenStatuses.Clear();
-            NumericModifier = null;
+            AttributeTypeModifiers = null;
             GetParent<CombatEntity>().OnStatusRemove(this);
             base.EndAbility();
         }

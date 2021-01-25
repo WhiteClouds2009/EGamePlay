@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System;
 
 namespace EGamePlay.Combat.Ability
 {
@@ -46,6 +47,7 @@ namespace EGamePlay.Combat.Ability
         
         public void ApplyEffectTo(CombatEntity targetEntity, Effect effectItem)
         {
+            // 伤害行为
             if (effectItem is DamageEffect damageEffect)
             {
                 var action = this.OwnerEntity.CreateCombatAction<DamageAction>();
@@ -54,6 +56,7 @@ namespace EGamePlay.Combat.Ability
                 action.DamageEffect = damageEffect;
                 action.ApplyDamage();
             }
+            // 治疗行为
             else if (effectItem is CureEffect cureEffect)
             {
                 var action = this.OwnerEntity.CreateCombatAction<CureAction>();
@@ -61,6 +64,7 @@ namespace EGamePlay.Combat.Ability
                 action.CureEffect = cureEffect;
                 action.ApplyCure();
             }
+            // 效果赋予行为
             else
             {
                 var action = this.OwnerEntity.CreateCombatAction<AssignEffectAction>();
@@ -77,10 +81,8 @@ namespace EGamePlay.Combat.Ability
                         {
                             foreach (var item3 in addStatusEffect.Params)
                             {
-                                if (!string.IsNullOrEmpty(statusConfig.NumericValue))
-                                {
-                                    statusConfig.NumericValue = statusConfig.NumericValue.Replace(item3.Key, item3.Value);
-                                }
+                                var type = (AttributeType)Enum.Parse(typeof(AttributeType), item3.Key);
+                                statusConfig.AttributeTypeDatas.Add(type, item3.Value);
                             }
                         }
                         if (statusConfig.EnabledLogicTrigger)

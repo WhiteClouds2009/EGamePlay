@@ -1,16 +1,18 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
-using Sirenix.OdinInspector;
-using Sirenix.Serialization;
-using System;
-using System.IO;
-using Sirenix.OdinInspector.Editor;
-using UnityEngine.PlayerLoop;
-using Sirenix.Utilities.Editor;
-using UnityEngine.Serialization;
 using System.Linq;
 using System.Reflection;
+using System;
+using System.IO;
+
+using UnityEngine;
+using UnityEngine.PlayerLoop;
+using UnityEngine.Serialization;
+
+using Sirenix.Utilities.Editor;
+using Sirenix.OdinInspector;
+using Sirenix.Serialization;
+using Sirenix.OdinInspector.Editor;
 
 namespace EGamePlay.Combat
 {
@@ -18,39 +20,72 @@ namespace EGamePlay.Combat
     [LabelText("技能配置")]
     public class SkillConfigObject : SerializedScriptableObject
     {
+        // 是否显示范围半径
+        public bool ShowAoeaRadius
+        {
+            get
+            {
+                var targetSelectTypeFlag = (TargetSelectType == TargetSelectType.Circle || TargetSelectType == TargetSelectType.Line);
+                return (AffectTargetType != AffectTargetType.Self) && targetSelectTypeFlag;
+            }
+        }
+
+        public bool ShowDistance
+        {
+            get
+            {
+                return AffectTargetType != AffectTargetType.Self;
+            }
+        }
+
+        [Title("常规设置")]
         [LabelText("技能ID"), DelayedProperty]
         public uint ID;
+
         [LabelText("技能名称"), DelayedProperty]
         public string Name = "技能1";
+
+        [LabelText("技能图片"), DelayedProperty]
+        public Sprite Image;
+
+        [Space(20)]
+        [Title("释放设置")]
         public SkillSpellType SkillSpellType;
-        [LabelText("技能目标检测方式"), ShowIf("SkillSpellType", SkillSpellType.Initiative)]
-        public SkillTargetSelectType TargetSelectType;
-        [LabelText("区域场类型"), ShowIf("TargetSelectType", SkillTargetSelectType.AreaSelect)]
-        public SkillAffectAreaType AffectAreaType;
 
-        [LabelText("圆形区域场半径"), ShowIf("ShowCircleAreaRadius")]
-        public float CircleAreaRadius;
-        public bool ShowCircleAreaRadius { get { return AffectAreaType == SkillAffectAreaType.Circle && TargetSelectType == SkillTargetSelectType.AreaSelect; } }
+        [ShowIf("SkillSpellType", SkillSpellType.Initiative)]
+        public AffectTargetType AffectTargetType;
 
-        //[LabelText("区域场引导配置"), ShowIf("TargetSelectType", SkillTargetSelectType.AreaSelect)]
-        //public GameObject AreaGuideObj;
-        [LabelText("区域场配置"), ShowIf("TargetSelectType", SkillTargetSelectType.AreaSelect)]
-        public GameObject AreaCollider;
+        [HideIf("AffectTargetType", AffectTargetType.Self)]
+        public TargetSelectType TargetSelectType;
 
-        [LabelText("技能作用对象"), ShowIf("SkillSpellType", SkillSpellType.Initiative)]
-        public SkillAffectTargetType AffectTargetType;
+        [LabelText("范围半径"), DelayedProperty]
+        [ShowIf("ShowAoeaRadius")]
+        public float Radius = 1;
 
-        //[ToggleGroup("Cold", "技能冷却")]
-        //public bool Cold = false;
-        [/*ToggleGroup("Cold"), */LabelText("冷却时间"), SuffixLabel("毫秒", true), ShowIf("SkillSpellType", SkillSpellType.Initiative)]
-        public uint ColdTime;
+        [LabelText("释放距离"), DelayedProperty]
+        [ShowIf("ShowDistance")]
+        public float Distance = 1;
 
-        [LabelText("效果列表"), Space(30)]
+        [Title("消耗设置"), Space(20)]
+        [LabelText("冷却时间"), DelayedProperty, SuffixLabel("秒", true)]
+        public float Cooldown = 3;
+
+        [LabelText("蓝量消耗"), DelayedProperty]
+        public float MagicCost = 20;
+
+        // //[LabelText("区域场引导配置"), ShowIf("TargetSelectType", SkillTargetSelectType.AreaSelect)]
+        // //public GameObject AreaGuideObj;
+        // [LabelText("区域场配置"), ShowIf("TargetSelectType", SkillTargetSelectType.AreaSelect)]
+        // public GameObject AreaCollider;
+
+
+        [Title("效果设置"), Space(20)]
         [ListDrawerSettings(Expanded = true, DraggableItems = true, ShowItemCount = false, HideAddButton = true)]
         [HideReferenceObjectPicker]
+        [LabelText("行动列表")]
         public List<Effect> Effects = new List<Effect>();
 
-        [HorizontalGroup(PaddingLeft = 40, PaddingRight = 40)]
+        [HorizontalGroup]
         [HideLabel]
         [OnValueChanged("AddEffect")]
         [ValueDropdown("EffectTypeSelect")]
@@ -86,77 +121,22 @@ namespace EGamePlay.Combat
 
                 EffectTypeName = "(添加效果)";
             }
-            //SkillHelper.AddEffect(Effects, EffectType);
         }
 
-        private void BeginBox()
-        {
-            GUILayout.Space(30);
-            SirenixEditorGUI.DrawThickHorizontalSeparator();
-            GUILayout.Space(10);
-            SirenixEditorGUI.BeginBox("技能表现");
-        }
-        [OnInspectorGUI("BeginBox", append: false)]
+        [Space(20)]
+        [Title("技能表现")]
         [LabelText("技能动作")]
         public AnimationClip SkillAnimationClip;
+
         [LabelText("技能特效")]
         public GameObject SkillEffectObject;
-        [LabelText("技能音效")]
-        [OnInspectorGUI("EndBox", append: true)]
-        public AudioClip SkillAudio;
-        private void EndBox()
-        {
-            SirenixEditorGUI.EndBox();
-            GUILayout.Space(30);
-            SirenixEditorGUI.DrawThickHorizontalSeparator();
-            GUILayout.Space(10);
-        }
 
+        [LabelText("技能音效")]
+        public AudioClip SkillAudio;
+
+        [Space(20)]
+        [Title("文本描述")]
         [TextArea, LabelText("技能描述")]
         public string SkillDescription;
-
-        [OnInspectorGUI]
-        private void OnInspectorGUI()
-        {
-            foreach (var item in this.Effects)
-            {
-                item.IsSkillEffect = true;
-            }
-
-            string[] guids = UnityEditor.Selection.assetGUIDs;
-            int i = guids.Length;
-            if (i == 1)
-            {
-                string guid = guids[0];
-                string assetPath = UnityEditor.AssetDatabase.GUIDToAssetPath(guid);
-                var fileName = Path.GetFileName(assetPath);
-                var newName = $"Skill_{this.ID}_{this.Name}";
-                if (!fileName.StartsWith(newName))
-                {
-                    Debug.Log(assetPath);
-                    UnityEditor.AssetDatabase.RenameAsset(assetPath, newName);
-                }
-            }
-        }
-    }
-
-    [LabelText("护盾类型")]
-    public enum ShieldType
-    {
-        [LabelText("普通护盾")]
-        Shield,
-        [LabelText("物理护盾")]
-        PhysicShield,
-        [LabelText("魔法护盾")]
-        MagicShield,
-        [LabelText("技能护盾")]
-        SkillShield,
-    }
-
-    [LabelText("标记类型")]
-    public enum TagType
-    {
-        [LabelText("能量标记")]
-        Power,
     }
 }
