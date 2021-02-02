@@ -30,7 +30,7 @@ namespace EGamePlay.Combat
 
         [LabelText("[每点力量]最大生命值")]
         [Description("[每点力量]最大生命值")]
-        HpMaxGrowth,
+        HpMaxRate,
 
         [LabelText("最大法术值")]
         [Description("最大法术值")]
@@ -38,7 +38,7 @@ namespace EGamePlay.Combat
 
         [LabelText("[每点智力]最大法术值")]
         [Description("[每点智力]最大法术值")]
-        MpMaxGrowth,
+        MpMaxRate,
 
         [LabelText("生命恢复")]
         [Description("生命恢复")]
@@ -46,7 +46,7 @@ namespace EGamePlay.Combat
 
         [LabelText("[每点力量]生命恢复")]
         [Description("[每点力量]生命恢复")]
-        HpRegenerationGrowth,
+        HpRegenerationRate,
 
         [LabelText("法力恢复")]
         [Description("法力恢复")]
@@ -54,7 +54,7 @@ namespace EGamePlay.Combat
 
         [LabelText("[每点智力]法力恢复")]
         [Description("[每点智力]法力恢复")]
-        MpRegenerationGrowth,
+        MpRegenerationRate,
 
         [LabelText("护甲")]
         [Description("护甲")]
@@ -62,7 +62,7 @@ namespace EGamePlay.Combat
 
         [LabelText("[每点敏捷]护甲")]
         [Description("[每点敏捷]护甲")]
-        ArmorGrowth,
+        ArmorRate,
 
         [LabelText("抗性")]
         [Description("抗性")]
@@ -70,7 +70,7 @@ namespace EGamePlay.Combat
 
         [LabelText("[每点力量]抗性")]
         [Description("[每点力量]抗性")]
-        ResistanceGrowth,
+        ResistanceRate,
 
         [LabelText("移动速度")]
         [Description("移动速度")]
@@ -78,7 +78,7 @@ namespace EGamePlay.Combat
 
         [LabelText("[每点敏捷]移动速度")]
         [Description("[每点敏捷]移动速度")]
-        MoveSpeedGrowth,
+        MoveSpeedRate,
 
         [LabelText("攻击力")]
         [Description("攻击力")]
@@ -90,7 +90,7 @@ namespace EGamePlay.Combat
 
         [LabelText("[每点敏捷]攻击速度")]
         [Description("[每点敏捷]攻击速度")]
-        AttackSpeedGrowth,
+        AttackSpeedRate,
 
         [LabelText("攻击距离")]
         [Description("攻击距离")]
@@ -102,18 +102,18 @@ namespace EGamePlay.Combat
 
         [LabelText("闪避率")]
         [Description("闪避率")]
-        DodgeRate,
+        Dodge,
 
         [LabelText("暴击率")]
         [Description("暴击率")]
-        CrticalRate,
+        Crtical,
 
         [LabelText("技能增强")]
         [Description("技能增强")]
-        SkillDamageRate,
+        SkillStrengthen,
 
         [LabelText("[每点智力]技能增强")]
         [Description("[每点智力]技能增强")]
-        SkillDamageRateGrowth,
+        SkillStrengthenRate
     }
 }

@@ -22,16 +22,15 @@ namespace EGamePlay.Combat
         public float Direction { get; set; }
         public CombatContext CombatContext { get; set; }
 
-
         public override void Awake()
         {
             AddComponent<AttributeManageComponent>();
             AddComponent<ActionPointManageComponent>();
             AddComponent<ConditionManageComponent>();
-            Hp.SetMaxValue((int)AttributeComponent.HpMax.Value);
-            Hp.Reset();
-            Mp.SetMaxValue((int)AttributeComponent.MpMax.Value);
-            Mp.Reset();
+            // Hp.SetMaxValue((int)AttributeComponent.HpMax.Value);
+            // Hp.Reset();
+            // Mp.SetMaxValue((int)AttributeComponent.MpMax.Value);
+            // Mp.Reset();
             CombatContext = (CombatContext)Global.GetTypeChildren<CombatContext>()[0];
         }
 

@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System;
 
 namespace EGamePlay.Combat
 {
@@ -57,6 +58,7 @@ namespace EGamePlay.Combat
         private FloatModifierCollection FinalAddCollection { get; } = new FloatModifierCollection();
         private FloatModifierCollection FinalPctAddCollection { get; } = new FloatModifierCollection();
 
+        public Action<FloatNumeric> UpdateAction;
 
         public void Initialize()
         {
@@ -115,6 +117,11 @@ namespace EGamePlay.Combat
             var value2 = (value1 + add) * (100 + pctAdd) / 100f;
             var value3 = (value2 + finalAdd) * (100 + finalPctAdd) / 100f;
             Value = value3;
+
+            if(UpdateAction != null)
+            {
+                UpdateAction(this);
+            }
         }
     }
 }

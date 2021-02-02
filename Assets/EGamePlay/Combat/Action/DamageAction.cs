@@ -25,52 +25,58 @@ namespace EGamePlay.Combat
         private int ParseDamage()
         {
             var expression = ExpressionHelper.ExpressionParser.EvaluateExpression(DamageEffect.DamageValueFormula);
-            if (expression.Parameters.ContainsKey("自身攻击力"))
+
+            foreach (var item in Creator.AttributeComponent.attributeNumerics)
             {
-                expression.Parameters["自身攻击力"].Value = Creator.AttributeComponent.Attack.Value;
+                if (expression.Parameters.ContainsKey(item.Key))
+                {
+                    expression.Parameters[item.Key].Value = Creator.AttributeComponent.attributeNumerics[item.Key].Value;
+                }
             }
+
             return (int)expression.Value;
         }
 
         //前置处理
         private void PreProcess()
         {
+            var reduction = GetDamageReduction(Target, DamageEffect.DamageType);
+            var range = 1;
+            var addedRate = 0;
+            var addedValue = 0;
+            var damageValue = 0f;
+            // 普通攻击
             if (DamageSource == DamageSource.Attack)
             {
-                IsCritical = (RandomHelper.RandomRate() / 100f) < Creator.AttributeComponent.CrticalRate.Value;
-                DamageValue = (int)Mathf.Max(1, Creator.AttributeComponent.Attack.Value - Target.AttributeComponent.Armor.Value);
+                var attack = Creator.AttributeComponent.GetNumeric(AttributeType.Attack);
+                var crtical = Creator.AttributeComponent.GetNumeric(AttributeType.Crtical);
+                damageValue = attack.Value;
+
+                IsCritical = (RandomHelper.RandomRate() / 100f) < crtical.Value;
                 if (IsCritical)
                 {
-                    DamageValue = (int)(DamageValue * 1.5f);
+                    damageValue = (int)(DamageValue * 1.5f);
                 }
             }
-            if (DamageSource == DamageSource.Skill)
+            // 技能攻击
+            else if (DamageSource == DamageSource.Skill)
             {
-                if (DamageEffect.CanCrit)
-                {
-                    IsCritical = (RandomHelper.RandomRate() / 100f) < Creator.AttributeComponent.CrticalRate.Value;
-                }
-                DamageValue = ParseDamage();
-                if (IsCritical)
-                {
-                    DamageValue = (int)(DamageValue * 1.5f);
-                }
+                damageValue = ParseDamage();
             }
-            if (DamageSource == DamageSource.Buff)
+            // 状态伤害
+            else if (DamageSource == DamageSource.Buff)
             {
-                if (DamageEffect.CanCrit)
-                {
-                    IsCritical = (RandomHelper.RandomRate() / 100f) < Creator.AttributeComponent.CrticalRate.Value;
-                }
-                DamageValue = ParseDamage();
+                damageValue = ParseDamage();
             }
+
+            //攻击伤害 = 攻击力 * 伤害倍率 * 伤害波动 * 额外倍率 + 额外伤害
+            DamageValue = (int)Mathf.Max(1, damageValue * (1 - reduction) * range * (1 + addedRate) + addedValue);
         }
 
         //应用伤害
         public void ApplyDamage()
         {
             PreProcess();
-            //Log.Debug("DamageAction ApplyDamage");
             Target.ReceiveDamage(this);
             PostProcess();
         }
@@ -82,6 +88,29 @@ namespace EGamePlay.Combat
             Creator.TriggerActionPoint(ActionPointType.PostCauseDamage, this);
             //触发 承受伤害后 行动点
             Target.TriggerActionPoint(ActionPointType.PostReceiveDamage, this);
+        }
+
+        private float GetDamageReduction(CombatEntity Target, DamageType damageType)
+        {
+            float damageReduction = 0f;
+
+            switch (damageType)
+            {
+                case DamageType.physics:
+                    {
+                        //物理抗性
+                        damageReduction = Target.AttributeComponent.PhysicalReduction;
+                    }
+                    break;
+                case DamageType.magic:
+                    {
+                        //法术抗性
+                        damageReduction = Target.AttributeComponent.MagicReduction;
+                    }
+                    break;
+            }
+
+            return damageReduction;
         }
     }
 

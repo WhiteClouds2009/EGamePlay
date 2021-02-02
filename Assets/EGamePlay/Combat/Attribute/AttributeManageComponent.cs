@@ -9,87 +9,14 @@ namespace EGamePlay.Combat
     public class AttributeManageComponent : Component
     {
         public readonly Dictionary<string, FloatNumeric> attributeNumerics = new Dictionary<string, FloatNumeric>();
-        // public FloatNumeric HealthPoint { get { return attributeNumerics[nameof(AttributeType.HealthPoint)]; } }
-        // public FloatNumeric AttackPower { get { return attributeNumerics[nameof(AttributeType.AttackPower)]; } }
-        // public FloatNumeric AttackDefense { get { return attributeNumerics[nameof(AttributeType.AttackDefense)]; } }
-        // public FloatNumeric CriticalProbability { get { return attributeNumerics[nameof(AttributeType.CriticalProbability)]; } }
-        [Description("力量")]
-        public FloatNumeric Strength { get; set; }
 
-        [Description("敏捷")]
-        public FloatNumeric Agility { get; set; }
+        private readonly Dictionary<AttributeType, FloatModifier> growthModifiers = new Dictionary<AttributeType, FloatModifier>();
 
-        [Description("智力")]
-        public FloatNumeric Intellect { get; set; }
+        //物理抗性
+        public float PhysicalReduction { get; private set; }
 
-        [Description("最大生命值")]
-        public FloatNumeric HpMax { get; set; }
-
-        [Description("[每点力量]最大生命值")]
-        public FloatNumeric HpMaxGrowth { get; set; }
-
-        [Description("最大法术值")]
-        public FloatNumeric MpMax { get; set; }
-
-        [Description("[每点智力]最大法术值")]
-        public FloatNumeric MpMaxGrowth { get; set; }
-
-        [Description("生命恢复")]
-        public FloatNumeric HpRegeneration { get; set; }
-
-        [Description("[每点力量]生命恢复")]
-        public FloatNumeric HpRegenerationGrowth { get; set; }
-
-        [Description("法力恢复")]
-        public FloatNumeric MpRegeneration { get; set; }
-
-        [Description("[每点智力]法力恢复")]
-        public FloatNumeric MpRegenerationGrowth { get; set; }
-
-        [Description("护甲")]
-        public FloatNumeric Armor { get; set; }
-
-        [Description("[每点敏捷]护甲")]
-        public FloatNumeric ArmorGrowth { get; set; }
-
-        [Description("抗性")]
-        public FloatNumeric Resistance { get; set; }
-
-        [Description("[每点力量]抗性")]
-        public FloatNumeric ResistanceGrowth { get; set; }
-
-        [Description("移动速度")]
-        public FloatNumeric MoveSpeed { get; set; }
-
-        [Description("[每点敏捷]移动速度")]
-        public FloatNumeric MoveSpeedGrowth { get; set; }
-
-        [Description("攻击力")]
-        public FloatNumeric Attack { get; set; }
-
-        [Description("攻击速度")]
-        public FloatNumeric AttackSpeed { get; set; }
-
-        [Description("[每点敏捷]攻击速度")]
-        public FloatNumeric AttackSpeedGrowth { get; set; }
-
-        [Description("攻击距离")]
-        public FloatNumeric AttackDistance { get; set; }
-
-        [Description("命中率")]
-        public FloatNumeric HitRate { get; set; }
-
-        [Description("闪避率")]
-        public FloatNumeric DodgeRate { get; set; }
-
-        [Description("暴击率")]
-        public FloatNumeric CrticalRate { get; set; }
-
-        [Description("技能增强")]
-        public FloatNumeric SkillDamageRate { get; set; }
-
-        [Description("[每点智力]技能增强")]
-        public FloatNumeric SkillDamageRateGrowth { get; set; }
+        //法术抗性
+        public float MagicReduction { get; private set; }
 
         public override void Setup()
         {
@@ -98,18 +25,131 @@ namespace EGamePlay.Combat
 
         public void Initialize()
         {
-            // AddNumeric(nameof(AttributeType.HealthPoint), 99_999);
-            // AddNumeric(nameof(AttributeType.AttackPower), 1000);
-            // AddNumeric(nameof(AttributeType.AttackDefense), 300);
-            // AddNumeric(nameof(AttributeType.CriticalProbability), 0.5f);
+            // 三大属性
+            var Strength = AddNumeric(AttributeType.Strength, 10);
+            var Agility = AddNumeric(AttributeType.Agility, 10);
+            var Intellect = AddNumeric(AttributeType.Intellect, 10);
+
+            // 生命值
+            var HpMax = AddNumeric(AttributeType.HpMax, 200);
+            var HpMaxRate = AddNumeric(AttributeType.HpMaxRate, 20);
+            var HpRegeneration = AddNumeric(AttributeType.HpRegeneration, 10);
+            var HpRegenerationRate = AddNumeric(AttributeType.HpRegenerationRate, 10);
+
+            // 法术值
+            var MpMax = AddNumeric(AttributeType.MpMax, 120);
+            var MpMaxRate = AddNumeric(AttributeType.MpMaxRate, 20);
+            var MpRegeneration = AddNumeric(AttributeType.MpRegeneration, 10);
+            var MpRegenerationRate = AddNumeric(AttributeType.MpRegenerationRate, 10);
+
+            // 攻击
+            var Attack = AddNumeric(AttributeType.Attack, 20);
+            var AttackSpeed = AddNumeric(AttributeType.AttackSpeed, 100);
+            var AttackSpeedRate = AddNumeric(AttributeType.AttackSpeedRate, 10);
+
+            // 防御
+            var Armor = AddNumeric(AttributeType.Armor, 10);
+            var ArmorRate = AddNumeric(AttributeType.ArmorRate, 10);
+            var Resistance = AddNumeric(AttributeType.Resistance, 10);
+            var ResistanceRate = AddNumeric(AttributeType.ResistanceRate, 10);
+
+            // 常规
+            var MoveSpeed = AddNumeric(AttributeType.MoveSpeed, 10);
+            var MoveSpeedRate = AddNumeric(AttributeType.MoveSpeedRate, 10);
+            var SkillStrengthen = AddNumeric(AttributeType.SkillStrengthen, 10);
+            var SkillStrengthenRate = AddNumeric(AttributeType.SkillStrengthenRate, 10);
+
+            Strength.UpdateAction = (Attribute) =>
+            {
+                UpdateGrowth(Attribute, growthModifiers[AttributeType.HpMax], HpMax, HpMaxRate);
+                UpdateGrowth(Attribute, growthModifiers[AttributeType.HpRegeneration], HpRegeneration, HpRegenerationRate);
+            };
+
+            Agility.UpdateAction = (Attribute) =>
+            {
+                UpdateGrowth(Attribute, growthModifiers[AttributeType.Armor], Armor, ArmorRate);
+                UpdateGrowth(Attribute, growthModifiers[AttributeType.AttackSpeed], AttackSpeed, AttackSpeedRate);
+                UpdateGrowth(Attribute, growthModifiers[AttributeType.MoveSpeed], MoveSpeed, MoveSpeedRate);
+            };
+
+            Intellect.UpdateAction = (Attribute) =>
+            {
+                UpdateGrowth(Attribute, growthModifiers[AttributeType.MpMax], MpMax, MpMaxRate);
+                UpdateGrowth(Attribute, growthModifiers[AttributeType.MpRegeneration], MpRegeneration, MpRegenerationRate);
+                UpdateGrowth(Attribute, growthModifiers[AttributeType.SkillStrengthen], SkillStrengthen, SkillStrengthenRate);
+            };
+
+            Armor.UpdateAction = (Attribute) =>
+            {
+                PhysicalReduction = GetPhysicalReduction();
+            };
+
+            Resistance.UpdateAction = (Attribute) =>
+            {
+                MagicReduction = GetMagicReduction();
+            };
         }
 
-        public FloatNumeric AddNumeric(string type, float baseValue)
+        private FloatNumeric AddNumeric(AttributeType type, float baseValue)
         {
+            var key = type.ToString();
+
             var numeric = new FloatNumeric();
             numeric.SetBase(baseValue);
-            attributeNumerics.Add(type, numeric);
+            attributeNumerics.Add(key, numeric);
+
+            var modifiers = new FloatModifier();
+            growthModifiers.Add(type, modifiers);
+
             return numeric;
+        }
+
+        public FloatNumeric GetNumeric(AttributeType type)
+        {
+            return attributeNumerics[type.ToString()];
+        }
+
+        /// <summary>
+        /// 更新成长数值
+        /// </summary>
+        /// <param name="modifier">数值修饰器</param>
+        /// <param name="element">主属性</param>
+        /// <param name="target">影响属性</param>
+        /// <param name="rate">影响属性比率</param>
+        private void UpdateGrowth(FloatNumeric element, FloatModifier modifier, FloatNumeric target, FloatNumeric rate)
+        {
+            var value = element.Value * rate.Value;
+            if (modifier == null)
+            {
+                modifier = new FloatModifier();
+            }
+            else
+            {
+                target.RemoveAddModifier(modifier);
+            }
+
+            modifier.Value = value;
+            target.AddAddModifier(modifier);
+        }
+
+        private float GetPhysicalReduction()
+        {
+            var armor = GetNumeric(AttributeType.Armor);
+
+            //护甲的物理伤害减免
+            float armorReduction = 0.06f * armor.Value / (1 + 0.06f * armor.Value);
+
+            return armorReduction;
+        }
+
+        private float GetMagicReduction()
+        {
+            var resistance = GetNumeric(AttributeType.Resistance);
+
+            //抗性的法术伤害减免
+            float magicArmorReduction = 0.06f * resistance.Value / (1 + 0.06f * resistance.Value);
+
+            return magicArmorReduction;
         }
     }
 }
