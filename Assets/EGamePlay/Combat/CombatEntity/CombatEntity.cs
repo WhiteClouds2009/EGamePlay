@@ -13,8 +13,6 @@ namespace EGamePlay.Combat
     /// </summary>
     public sealed class CombatEntity : Entity
     {
-        public PointNumeric Hp { get; private set; } = new PointNumeric();
-        public PointNumeric Mp { get; private set; } = new PointNumeric();
         public AttributeManageComponent AttributeComponent { get { return GetComponent<AttributeManageComponent>(); } }
         public Dictionary<string, AbilityEntity> NameAbilitys { get; set; } = new Dictionary<string, AbilityEntity>();
         public Dictionary<KeyCode, AbilityEntity> InputAbilitys { get; set; } = new Dictionary<KeyCode, AbilityEntity>();
@@ -27,10 +25,7 @@ namespace EGamePlay.Combat
             AddComponent<AttributeManageComponent>();
             AddComponent<ActionPointManageComponent>();
             AddComponent<ConditionManageComponent>();
-            // Hp.SetMaxValue((int)AttributeComponent.HpMax.Value);
-            // Hp.Reset();
-            // Mp.SetMaxValue((int)AttributeComponent.MpMax.Value);
-            // Mp.Reset();
+            
             CombatContext = (CombatContext)Global.GetTypeChildren<CombatContext>()[0];
         }
 
@@ -72,13 +67,13 @@ namespace EGamePlay.Combat
         public void ReceiveDamage(CombatAction combatAction)
         {
             var damageAction = combatAction as DamageAction;
-            Hp.Minus(damageAction.DamageValue);
+            AttributeComponent.MinusHp(damageAction.DamageValue);
         }
 
         public void ReceiveCure(CombatAction combatAction)
         {
             var cureAction = combatAction as CureAction;
-            Hp.Add(cureAction.CureValue);
+            AttributeComponent.AddHp(cureAction.CureValue);
         }
 
         /// <summary>

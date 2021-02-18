@@ -53,6 +53,7 @@ namespace EGamePlay.Combat
         public float pctAdd { get; private set; }
         public float finalAdd { get; private set; }
         public float finalPctAdd { get; private set; }
+        public float minLimit { get; set; }
         private FloatModifierCollection AddCollection { get; } = new FloatModifierCollection();
         private FloatModifierCollection PctAddCollection { get; } = new FloatModifierCollection();
         private FloatModifierCollection FinalAddCollection { get; } = new FloatModifierCollection();
@@ -118,7 +119,12 @@ namespace EGamePlay.Combat
             var value3 = (value2 + finalAdd) * (100 + finalPctAdd) / 100f;
             Value = value3;
 
-            if(UpdateAction != null)
+            if(Value < minLimit)
+            {
+                Value = minLimit;
+            }
+
+            if (UpdateAction != null)
             {
                 UpdateAction(this);
             }

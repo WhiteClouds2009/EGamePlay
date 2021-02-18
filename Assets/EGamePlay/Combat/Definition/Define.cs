@@ -46,6 +46,12 @@ namespace EGamePlay.Combat
         [LabelText("承受伤害后")]
         PostReceiveDamage,
 
+        [LabelText("给予治疗前")]
+        PreGiveCure,
+
+        [LabelText("接受治疗前")]
+        PreReceiveCure,
+
         [LabelText("给予治疗后")]
         PostGiveCure,
 
@@ -64,20 +70,21 @@ namespace EGamePlay.Combat
         [LabelText("承受状态后")]
         PostReceiveStatus
     }
+
+    [LabelText("伤害类型")]
+    public enum DamageType
+    {
+        [Description("物理")]
+        [LabelText("物理")]
+        physics,
+
+        [Description("法术")]
+        [LabelText("法术")]
+        magic,
+
+        [Description("纯粹")]
+        [LabelText("纯粹")]
+        pure
+    }
 }
 
-[LabelText("伤害类型")]
-public enum DamageType
-{
-    [Description("物理")]
-    [LabelText("物理")]
-    physics,
-
-    [Description("法术")]
-    [LabelText("法术")]
-    magic,
-
-    [Description("纯粹")]
-    [LabelText("纯粹")]
-    pure
-}

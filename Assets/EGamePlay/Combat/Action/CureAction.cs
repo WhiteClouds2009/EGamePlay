@@ -18,6 +18,11 @@ namespace EGamePlay.Combat
         //前置处理
         private void PreProcess()
         {
+            //触发 给予治疗前 行动点
+            Creator.TriggerActionPoint(ActionPointType.PreGiveCure, this);
+            //触发 接受治疗前 行动点
+            Target.TriggerActionPoint(ActionPointType.PreReceiveCure, this);
+
             if (CureEffect != null)
             {
                 CureValue = int.Parse(CureEffect.CureValueFormula);

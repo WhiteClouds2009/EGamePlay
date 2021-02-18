@@ -18,6 +18,20 @@ namespace EGamePlay.Combat
         //法术抗性
         public float MagicReduction { get; private set; }
 
+        public float Hp
+        {
+            get;
+            private set;
+        }
+
+        public float Mp
+        {
+            get;
+            private set;
+        }
+
+
+
         public override void Setup()
         {
             Initialize();
@@ -30,11 +44,17 @@ namespace EGamePlay.Combat
             var Agility = AddNumeric(AttributeType.Agility, 10);
             var Intellect = AddNumeric(AttributeType.Intellect, 10);
 
+            Strength.minLimit = 1;
+            Agility.minLimit = 1;
+            Intellect.minLimit = 1;
+
             // 生命值
             var HpMax = AddNumeric(AttributeType.HpMax, 200);
             var HpMaxRate = AddNumeric(AttributeType.HpMaxRate, 20);
             var HpRegeneration = AddNumeric(AttributeType.HpRegeneration, 10);
             var HpRegenerationRate = AddNumeric(AttributeType.HpRegenerationRate, 10);
+
+            HpMax.minLimit = 150;
 
             // 法术值
             var MpMax = AddNumeric(AttributeType.MpMax, 120);
@@ -42,10 +62,15 @@ namespace EGamePlay.Combat
             var MpRegeneration = AddNumeric(AttributeType.MpRegeneration, 10);
             var MpRegenerationRate = AddNumeric(AttributeType.MpRegenerationRate, 10);
 
+            MpMax.minLimit = 80;
+
             // 攻击
             var Attack = AddNumeric(AttributeType.Attack, 20);
             var AttackSpeed = AddNumeric(AttributeType.AttackSpeed, 100);
             var AttackSpeedRate = AddNumeric(AttributeType.AttackSpeedRate, 10);
+
+            Attack.minLimit = 10;
+            AttackSpeed.minLimit = 10;
 
             // 防御
             var Armor = AddNumeric(AttributeType.Armor, 10);
@@ -58,6 +83,27 @@ namespace EGamePlay.Combat
             var MoveSpeedRate = AddNumeric(AttributeType.MoveSpeedRate, 10);
             var SkillStrengthen = AddNumeric(AttributeType.SkillStrengthen, 10);
             var SkillStrengthenRate = AddNumeric(AttributeType.SkillStrengthenRate, 10);
+
+            MoveSpeed.minLimit = 50;
+            
+            //属性更新的衍生影响
+            HpMax.UpdateAction = (Attribute) =>
+            {
+                //最大值限制
+                if (Hp > HpMax.Value)
+                {
+                    Hp = HpMax.Value;
+                }
+            };
+
+            MpMax.UpdateAction = (Attribute) =>
+            {
+                //最大值限制
+                if (Mp > MpMax.Value)
+                {
+                    Mp = MpMax.Value;
+                }
+            };
 
             Strength.UpdateAction = (Attribute) =>
             {
@@ -88,6 +134,9 @@ namespace EGamePlay.Combat
             {
                 MagicReduction = GetMagicReduction();
             };
+
+            Hp = HpMax.Value;
+            Mp = MpMax.Value;
         }
 
         private FloatNumeric AddNumeric(AttributeType type, float baseValue)
@@ -150,6 +199,35 @@ namespace EGamePlay.Combat
             float magicArmorReduction = 0.06f * resistance.Value / (1 + 0.06f * resistance.Value);
 
             return magicArmorReduction;
+        }
+
+        public bool AddHp(float value)
+        {
+            var HpMax = attributeNumerics[nameof(AttributeType.HpMax)];
+            //预期结果
+            var presentValue = Hp + value;
+            //不超过最大值
+            Hp = (presentValue < HpMax.Value ? presentValue : HpMax.Value);
+
+            return true;
+        }
+
+        public bool MinusHp(float value)
+        {
+            var HpMax = attributeNumerics[nameof(AttributeType.HpMax)];
+            //预期结果
+            var presentValue = Hp - value;
+            if (presentValue <= 0)
+            {
+                //触发死亡
+                Hp = 0;
+                return false;
+            }
+            else
+            {
+                Hp = presentValue;
+                return true;
+            }
         }
     }
 }

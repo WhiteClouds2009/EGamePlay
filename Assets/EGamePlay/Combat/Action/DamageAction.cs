@@ -6,6 +6,7 @@ using System;
 using B83.ExpressionParser;
 using GameUtils;
 
+
 namespace EGamePlay.Combat
 {
     /// <summary>
@@ -21,7 +22,17 @@ namespace EGamePlay.Combat
         //是否是暴击
         public bool IsCritical { get; set; }
 
+        //波动范围
+        public float ComputeMinRange = 0.8f;
+        public float ComputeMaxRange = 1.2f;
 
+        //伤害的额外比例
+        public float ComputeAddedRate = 0;
+
+        //固定伤害
+        public float ComputeFixedValue = 0;
+
+        //技能和状态的伤害计算
         private int ParseDamage()
         {
             var expression = ExpressionHelper.ExpressionParser.EvaluateExpression(DamageEffect.DamageValueFormula);
@@ -40,10 +51,12 @@ namespace EGamePlay.Combat
         //前置处理
         private void PreProcess()
         {
+            //触发 造成伤害前 行动点
+            Creator.TriggerActionPoint(ActionPointType.PreCauseDamage, this);
+            //触发 承受伤害前 行动点
+            Target.TriggerActionPoint(ActionPointType.PreReceiveDamage, this);
+
             var reduction = GetDamageReduction(Target, DamageEffect.DamageType);
-            var range = 1;
-            var addedRate = 0;
-            var addedValue = 0;
             var damageValue = 0f;
             // 普通攻击
             if (DamageSource == DamageSource.Attack)
@@ -69,8 +82,10 @@ namespace EGamePlay.Combat
                 damageValue = ParseDamage();
             }
 
-            //攻击伤害 = 攻击力 * 伤害倍率 * 伤害波动 * 额外倍率 + 额外伤害
-            DamageValue = (int)Mathf.Max(1, damageValue * (1 - reduction) * range * (1 + addedRate) + addedValue);
+            var range = UnityEngine.Random.Range(ComputeMinRange, ComputeMaxRange);
+
+            //攻击伤害 = 攻击力 * 伤害倍率 * 伤害波动 * 额外倍率 + 固定伤害
+            DamageValue = (int)Mathf.Max(1, damageValue * (1 - reduction) * range * (1 + ComputeAddedRate) + ComputeFixedValue);
         }
 
         //应用伤害
