@@ -34,6 +34,18 @@ namespace EGamePlay.Combat
 
     public enum ActionPointType
     {
+        [LabelText("技能命中前")]
+        PreCauseSkill,
+
+        [LabelText("技能命中后")]
+        PostCauseSkill,
+
+        [LabelText("受到技能作用前")]
+        PreReceiveSkill,
+
+        [LabelText("受到技能作用后")]
+        PostReceiveSkill,
+
         [LabelText("造成伤害前")]
         PreCauseDamage,
 
@@ -70,8 +82,9 @@ namespace EGamePlay.Combat
         [LabelText("承受状态后")]
         PostReceiveStatus
     }
+}
 
-    [LabelText("伤害类型")]
+[LabelText("伤害类型")]
     public enum DamageType
     {
         [Description("物理")]
@@ -86,5 +99,3 @@ namespace EGamePlay.Combat
         [LabelText("纯粹")]
         pure
     }
-}
-
