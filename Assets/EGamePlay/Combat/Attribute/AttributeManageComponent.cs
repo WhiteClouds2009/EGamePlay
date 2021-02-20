@@ -45,8 +45,11 @@ namespace EGamePlay.Combat
             var Intellect = AddNumeric(AttributeType.Intellect, 10);
 
             Strength.minLimit = 1;
+            Strength.maxLimit = 9999;
             Agility.minLimit = 1;
+            Agility.maxLimit = 9999;
             Intellect.minLimit = 1;
+            Intellect.maxLimit = 9999;
 
             // 生命值
             var HpMax = AddNumeric(AttributeType.HpMax, 200);
@@ -54,7 +57,8 @@ namespace EGamePlay.Combat
             var HpRegeneration = AddNumeric(AttributeType.HpRegeneration, 10);
             var HpRegenerationRate = AddNumeric(AttributeType.HpRegenerationRate, 10);
 
-            HpMax.minLimit = 150;
+            HpMax.minLimit = 200;
+            HpMax.maxLimit = 99999;
 
             // 法术值
             var MpMax = AddNumeric(AttributeType.MpMax, 120);
@@ -62,7 +66,8 @@ namespace EGamePlay.Combat
             var MpRegeneration = AddNumeric(AttributeType.MpRegeneration, 10);
             var MpRegenerationRate = AddNumeric(AttributeType.MpRegenerationRate, 10);
 
-            MpMax.minLimit = 80;
+            MpMax.minLimit = 100;
+            MpMax.maxLimit = 99999;
 
             // 攻击
             var Attack = AddNumeric(AttributeType.Attack, 20);
@@ -70,7 +75,9 @@ namespace EGamePlay.Combat
             var AttackSpeedRate = AddNumeric(AttributeType.AttackSpeedRate, 10);
 
             Attack.minLimit = 10;
+            Attack.maxLimit = 99999;
             AttackSpeed.minLimit = 10;
+            AttackSpeed.maxLimit = 600;
 
             // 防御
             var Armor = AddNumeric(AttributeType.Armor, 10);
@@ -85,6 +92,10 @@ namespace EGamePlay.Combat
             var SkillStrengthenRate = AddNumeric(AttributeType.SkillStrengthenRate, 10);
 
             MoveSpeed.minLimit = 50;
+            MoveSpeed.maxLimit = 550;
+
+            SkillStrengthen.minLimit = 0.01f;
+            SkillStrengthen.maxLimit = 9f;
             
             //属性更新的衍生影响
             HpMax.UpdateAction = (Attribute) =>
@@ -201,6 +212,15 @@ namespace EGamePlay.Combat
             return magicArmorReduction;
         }
 
+        public void SetHp(float value)
+        {
+            var HpMax = attributeNumerics[nameof(AttributeType.HpMax)];
+            //预期结果
+            var presentValue = value;
+            //不超过最大值
+            Hp = (presentValue < HpMax.Value ? presentValue : HpMax.Value);
+        }
+
         public bool AddHp(float value)
         {
             var HpMax = attributeNumerics[nameof(AttributeType.HpMax)];
@@ -214,7 +234,6 @@ namespace EGamePlay.Combat
 
         public bool MinusHp(float value)
         {
-            var HpMax = attributeNumerics[nameof(AttributeType.HpMax)];
             //预期结果
             var presentValue = Hp - value;
             if (presentValue <= 0)
@@ -226,6 +245,42 @@ namespace EGamePlay.Combat
             else
             {
                 Hp = presentValue;
+                return true;
+            }
+        }
+
+        public void SetMp(float value)
+        {
+            var MpMax = attributeNumerics[nameof(AttributeType.MpMax)];
+            //预期结果
+            var presentValue = value;
+            //不超过最大值
+            Mp = (presentValue < MpMax.Value ? presentValue : MpMax.Value);
+        }
+
+        public bool AddMp(float value)
+        {
+            var MpMax = attributeNumerics[nameof(AttributeType.MpMax)];
+            //预期结果
+            var presentValue = Mp + value;
+            //不超过最大值
+            Mp = (presentValue < MpMax.Value ? presentValue : MpMax.Value);
+
+            return true;
+        }
+
+        public bool MinusMp(float value)
+        {
+            //预期结果
+            var presentValue = Mp - value;
+            if (presentValue <= 0)
+            {
+                Mp = 0;
+                return false;
+            }
+            else
+            {
+                Mp = presentValue;
                 return true;
             }
         }

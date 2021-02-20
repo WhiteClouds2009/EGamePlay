@@ -54,6 +54,7 @@ namespace EGamePlay.Combat
         public float finalAdd { get; private set; }
         public float finalPctAdd { get; private set; }
         public float minLimit { get; set; }
+        public float maxLimit { get; set; }
         private FloatModifierCollection AddCollection { get; } = new FloatModifierCollection();
         private FloatModifierCollection PctAddCollection { get; } = new FloatModifierCollection();
         private FloatModifierCollection FinalAddCollection { get; } = new FloatModifierCollection();
@@ -122,6 +123,10 @@ namespace EGamePlay.Combat
             if(Value < minLimit)
             {
                 Value = minLimit;
+            }
+            else if(Value > maxLimit)
+            {
+                Value = maxLimit;
             }
 
             if (UpdateAction != null)

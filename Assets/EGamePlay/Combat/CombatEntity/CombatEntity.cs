@@ -19,9 +19,12 @@ namespace EGamePlay.Combat
         public Vector3 Position { get; set; }
         public float Direction { get; set; }
         public CombatContext CombatContext { get; set; }
+        public GameObject OwnerGameObject{get;set;}
 
-        public override void Awake()
+        public override void Awake(object initData)
         {
+            OwnerGameObject = initData as GameObject;
+
             AddComponent<AttributeManageComponent>();
             AddComponent<ActionPointManageComponent>();
             AddComponent<ConditionManageComponent>();
