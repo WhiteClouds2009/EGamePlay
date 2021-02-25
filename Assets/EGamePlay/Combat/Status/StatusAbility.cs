@@ -36,7 +36,7 @@ namespace EGamePlay.Combat.Status
                 {
                     var value = int.Parse(item.Value);
                     var numericModifier = new FloatModifier() { Value = value };
-                    var attribute = attributeComponent.attributeNumerics[nameof(item.Value)];
+                    var attribute = attributeComponent.GetNumeric(item.Key);
                     attribute.AddAddModifier(numericModifier);
                     AttributeTypeModifiers.Add(item.Key, numericModifier);
                 }
@@ -83,7 +83,7 @@ namespace EGamePlay.Combat.Status
                 foreach (var item in StatusConfigObject.AttributeTypeDatas)
                 {
                     var numericModifier = AttributeTypeModifiers[item.Key];
-                    var attribute = attributeComponent.attributeNumerics[nameof(item.Value)];
+                    var attribute = attributeComponent.GetNumeric(item.Key);
                     attribute.RemoveAddModifier(numericModifier);
                 }
             }

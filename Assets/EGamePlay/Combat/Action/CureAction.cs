@@ -25,7 +25,18 @@ namespace EGamePlay.Combat
 
             if (CureEffect != null)
             {
-                CureValue = int.Parse(CureEffect.CureValueFormula);
+                var expression = ExpressionHelper.ExpressionParser.EvaluateExpression(CureEffect.CureValueFormula);
+
+                foreach (var item in Creator.AttributeComponent.GetNumericList())
+                {
+                    var key = item.Key.ToString();
+                    if (expression.Parameters.ContainsKey(key))
+                    {
+                        expression.Parameters[key].Value = Creator.AttributeComponent.GetNumeric(item.Key).Value;
+                    }
+                }
+
+                CureValue = (int)expression.Value;
             }
         }
 

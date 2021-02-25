@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel;
+using UnityEngine;
 
 namespace EGamePlay.Combat
 {
@@ -8,9 +9,7 @@ namespace EGamePlay.Combat
     /// </summary>
     public class AttributeManageComponent : Component
     {
-        public readonly Dictionary<string, FloatNumeric> attributeNumerics = new Dictionary<string, FloatNumeric>();
-
-        private readonly Dictionary<AttributeType, FloatModifier> growthModifiers = new Dictionary<AttributeType, FloatModifier>();
+        private readonly Dictionary<AttributeType, FloatNumeric> attributeNumerics = new Dictionary<AttributeType, FloatNumeric>();
 
         //物理抗性
         public float PhysicalReduction { get; private set; }
@@ -44,6 +43,28 @@ namespace EGamePlay.Combat
             var Agility = AddNumeric(AttributeType.Agility, 10);
             var Intellect = AddNumeric(AttributeType.Intellect, 10);
 
+            // 生命值
+            var HpMax = AddNumeric(AttributeType.HpMax, 200);
+            var HpRegeneration = AddNumeric(AttributeType.HpRegeneration, 10);
+
+            // 法术值
+            var MpMax = AddNumeric(AttributeType.MpMax, 120);
+            var MpRegeneration = AddNumeric(AttributeType.MpRegeneration, 0);
+
+            // 攻击
+            var Attack = AddNumeric(AttributeType.Attack, 20);
+            var AttackSpeed = AddNumeric(AttributeType.AttackSpeed, 100);
+
+            // 防御
+            var Armor = AddNumeric(AttributeType.Armor, 10);
+            var Resistance = AddNumeric(AttributeType.Resistance, 10);
+
+            // 常规
+            var MoveSpeed = AddNumeric(AttributeType.MoveSpeed, 300);
+            var SkillStrengthen = AddNumeric(AttributeType.SkillStrengthen, 10);
+            var Crtical = AddNumeric(AttributeType.Crtical, 0);
+
+            //设置上下限
             Strength.minLimit = 1;
             Strength.maxLimit = 9999;
             Agility.minLimit = 1;
@@ -51,100 +72,24 @@ namespace EGamePlay.Combat
             Intellect.minLimit = 1;
             Intellect.maxLimit = 9999;
 
-            // 生命值
-            var HpMax = AddNumeric(AttributeType.HpMax, 200);
-            var HpMaxRate = AddNumeric(AttributeType.HpMaxRate, 20);
-            var HpRegeneration = AddNumeric(AttributeType.HpRegeneration, 10);
-            var HpRegenerationRate = AddNumeric(AttributeType.HpRegenerationRate, 10);
-
             HpMax.minLimit = 200;
             HpMax.maxLimit = 99999;
-
-            // 法术值
-            var MpMax = AddNumeric(AttributeType.MpMax, 120);
-            var MpMaxRate = AddNumeric(AttributeType.MpMaxRate, 20);
-            var MpRegeneration = AddNumeric(AttributeType.MpRegeneration, 10);
-            var MpRegenerationRate = AddNumeric(AttributeType.MpRegenerationRate, 10);
-
             MpMax.minLimit = 100;
             MpMax.maxLimit = 99999;
-
-            // 攻击
-            var Attack = AddNumeric(AttributeType.Attack, 20);
-            var AttackSpeed = AddNumeric(AttributeType.AttackSpeed, 100);
-            var AttackSpeedRate = AddNumeric(AttributeType.AttackSpeedRate, 10);
 
             Attack.minLimit = 10;
             Attack.maxLimit = 99999;
             AttackSpeed.minLimit = 10;
             AttackSpeed.maxLimit = 600;
 
-            // 防御
-            var Armor = AddNumeric(AttributeType.Armor, 10);
-            var ArmorRate = AddNumeric(AttributeType.ArmorRate, 10);
-            var Resistance = AddNumeric(AttributeType.Resistance, 10);
-            var ResistanceRate = AddNumeric(AttributeType.ResistanceRate, 10);
-
-            // 常规
-            var MoveSpeed = AddNumeric(AttributeType.MoveSpeed, 10);
-            var MoveSpeedRate = AddNumeric(AttributeType.MoveSpeedRate, 10);
-            var SkillStrengthen = AddNumeric(AttributeType.SkillStrengthen, 10);
-            var SkillStrengthenRate = AddNumeric(AttributeType.SkillStrengthenRate, 10);
-
             MoveSpeed.minLimit = 50;
             MoveSpeed.maxLimit = 550;
 
             SkillStrengthen.minLimit = 0.01f;
             SkillStrengthen.maxLimit = 9f;
-            
-            //属性更新的衍生影响
-            HpMax.UpdateAction = (Attribute) =>
-            {
-                //最大值限制
-                if (Hp > HpMax.Value)
-                {
-                    Hp = HpMax.Value;
-                }
-            };
 
-            MpMax.UpdateAction = (Attribute) =>
-            {
-                //最大值限制
-                if (Mp > MpMax.Value)
-                {
-                    Mp = MpMax.Value;
-                }
-            };
-
-            Strength.UpdateAction = (Attribute) =>
-            {
-                UpdateGrowth(Attribute, growthModifiers[AttributeType.HpMax], HpMax, HpMaxRate);
-                UpdateGrowth(Attribute, growthModifiers[AttributeType.HpRegeneration], HpRegeneration, HpRegenerationRate);
-            };
-
-            Agility.UpdateAction = (Attribute) =>
-            {
-                UpdateGrowth(Attribute, growthModifiers[AttributeType.Armor], Armor, ArmorRate);
-                UpdateGrowth(Attribute, growthModifiers[AttributeType.AttackSpeed], AttackSpeed, AttackSpeedRate);
-                UpdateGrowth(Attribute, growthModifiers[AttributeType.MoveSpeed], MoveSpeed, MoveSpeedRate);
-            };
-
-            Intellect.UpdateAction = (Attribute) =>
-            {
-                UpdateGrowth(Attribute, growthModifiers[AttributeType.MpMax], MpMax, MpMaxRate);
-                UpdateGrowth(Attribute, growthModifiers[AttributeType.MpRegeneration], MpRegeneration, MpRegenerationRate);
-                UpdateGrowth(Attribute, growthModifiers[AttributeType.SkillStrengthen], SkillStrengthen, SkillStrengthenRate);
-            };
-
-            Armor.UpdateAction = (Attribute) =>
-            {
-                PhysicalReduction = GetPhysicalReduction();
-            };
-
-            Resistance.UpdateAction = (Attribute) =>
-            {
-                MagicReduction = GetMagicReduction();
-            };
+            Crtical.minLimit = 0;
+            Crtical.maxLimit = 1;
 
             Hp = HpMax.Value;
             Mp = MpMax.Value;
@@ -152,69 +97,54 @@ namespace EGamePlay.Combat
 
         private FloatNumeric AddNumeric(AttributeType type, float baseValue)
         {
-            var key = type.ToString();
-
             var numeric = new FloatNumeric();
             numeric.SetBase(baseValue);
-            attributeNumerics.Add(key, numeric);
-
-            var modifiers = new FloatModifier();
-            growthModifiers.Add(type, modifiers);
+            attributeNumerics.Add(type, numeric);
 
             return numeric;
         }
 
         public FloatNumeric GetNumeric(AttributeType type)
         {
-            return attributeNumerics[type.ToString()];
+            return attributeNumerics[type];
         }
 
-        /// <summary>
-        /// 更新成长数值
-        /// </summary>
-        /// <param name="modifier">数值修饰器</param>
-        /// <param name="element">主属性</param>
-        /// <param name="target">影响属性</param>
-        /// <param name="rate">影响属性比率</param>
-        private void UpdateGrowth(FloatNumeric element, FloatModifier modifier, FloatNumeric target, FloatNumeric rate)
+        public Dictionary<AttributeType, FloatNumeric> GetNumericList()
         {
-            var value = element.Value * rate.Value;
-            if (modifier == null)
-            {
-                modifier = new FloatModifier();
-            }
-            else
-            {
-                target.RemoveAddModifier(modifier);
-            }
-
-            modifier.Value = value;
-            target.AddAddModifier(modifier);
+            return attributeNumerics;
         }
 
-        private float GetPhysicalReduction()
+        public void UpdateAllNumeric()
+        {
+            foreach (var item in attributeNumerics)
+            {
+                item.Value.Update();
+            }
+        }
+
+        public float UpdatePhysicalReduction()
         {
             var armor = GetNumeric(AttributeType.Armor);
 
             //护甲的物理伤害减免
-            float armorReduction = 0.06f * armor.Value / (1 + 0.06f * armor.Value);
+            PhysicalReduction = 0.06f * armor.Value / (1 + 0.06f * armor.Value);
 
-            return armorReduction;
+            return PhysicalReduction;
         }
 
-        private float GetMagicReduction()
+        public float UpdateMagicReduction()
         {
             var resistance = GetNumeric(AttributeType.Resistance);
 
             //抗性的法术伤害减免
-            float magicArmorReduction = 0.06f * resistance.Value / (1 + 0.06f * resistance.Value);
+            MagicReduction = 0.06f * resistance.Value / (1 + 0.06f * resistance.Value);
 
-            return magicArmorReduction;
+            return MagicReduction;
         }
 
         public void SetHp(float value)
         {
-            var HpMax = attributeNumerics[nameof(AttributeType.HpMax)];
+            var HpMax = attributeNumerics[AttributeType.HpMax];
             //预期结果
             var presentValue = value;
             //不超过最大值
@@ -223,7 +153,7 @@ namespace EGamePlay.Combat
 
         public bool AddHp(float value)
         {
-            var HpMax = attributeNumerics[nameof(AttributeType.HpMax)];
+            var HpMax = attributeNumerics[AttributeType.HpMax];
             //预期结果
             var presentValue = Hp + value;
             //不超过最大值
@@ -251,7 +181,7 @@ namespace EGamePlay.Combat
 
         public void SetMp(float value)
         {
-            var MpMax = attributeNumerics[nameof(AttributeType.MpMax)];
+            var MpMax = attributeNumerics[AttributeType.MpMax];
             //预期结果
             var presentValue = value;
             //不超过最大值
@@ -260,7 +190,7 @@ namespace EGamePlay.Combat
 
         public bool AddMp(float value)
         {
-            var MpMax = attributeNumerics[nameof(AttributeType.MpMax)];
+            var MpMax = attributeNumerics[AttributeType.MpMax];
             //预期结果
             var presentValue = Mp + value;
             //不超过最大值

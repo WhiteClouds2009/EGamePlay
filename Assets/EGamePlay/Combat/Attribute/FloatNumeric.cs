@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System;
+using UnityEngine;
 
 namespace EGamePlay.Combat
 {
@@ -62,9 +63,16 @@ namespace EGamePlay.Combat
 
         public Action<FloatNumeric> UpdateAction;
 
+        public FloatNumeric()
+        {
+            Initialize();
+        }
+
         public void Initialize()
         {
             baseValue = add = pctAdd = finalAdd = finalPctAdd = 0f;
+            minLimit = -1;
+            maxLimit = -1;
         }
         public float SetBase(float value)
         {
@@ -120,11 +128,11 @@ namespace EGamePlay.Combat
             var value3 = (value2 + finalAdd) * (100 + finalPctAdd) / 100f;
             Value = value3;
 
-            if(Value < minLimit)
+            if(minLimit != -1 && Value < minLimit)
             {
                 Value = minLimit;
             }
-            else if(Value > maxLimit)
+            else if(maxLimit != -1 && Value > maxLimit)
             {
                 Value = maxLimit;
             }

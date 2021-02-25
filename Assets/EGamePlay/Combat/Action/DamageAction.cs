@@ -19,9 +19,6 @@ namespace EGamePlay.Combat
         //伤害来源
         public DamageSource DamageSource { get; set; }
 
-        //伤害类型
-        public DamageType DamageType { get; set; }
-
         //伤害数值
         public int DamageValue { get; set; }
 
@@ -43,11 +40,12 @@ namespace EGamePlay.Combat
         {
             var expression = ExpressionHelper.ExpressionParser.EvaluateExpression(DamageEffect.DamageValueFormula);
 
-            foreach (var item in Creator.AttributeComponent.attributeNumerics)
+            foreach (var item in Creator.AttributeComponent.GetNumericList())
             {
-                if (expression.Parameters.ContainsKey(item.Key))
+                var key = item.Key.ToString();
+                if (expression.Parameters.ContainsKey(key))
                 {
-                    expression.Parameters[item.Key].Value = Creator.AttributeComponent.attributeNumerics[item.Key].Value;
+                    expression.Parameters[key].Value = Creator.AttributeComponent.GetNumeric(item.Key).Value;
                 }
             }
 
@@ -57,17 +55,12 @@ namespace EGamePlay.Combat
         //前置处理
         private void PreProcess()
         {
-            if(DamageEffect != null)
-            {
-                DamageType = DamageEffect.DamageType;
-            }
-
             //触发 造成伤害前 行动点
             Creator.TriggerActionPoint(ActionPointType.PreCauseDamage, this);
             //触发 承受伤害前 行动点
             Target.TriggerActionPoint(ActionPointType.PreReceiveDamage, this);
 
-            var reduction = GetDamageReduction(Target, DamageType);
+            var reduction = GetDamageReduction(Target, DamageEffect.DamageType);
             var damageValue = 0f;
             // 普通攻击
             if (DamageSource == DamageSource.Attack)
